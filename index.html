@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cinephile — Discover • Rate • Review</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+
+ 
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px auto;
+  gap: 10px;
+}
+
+#searchInput {
+  width: 350px;
+  padding: 10px 15px;
+  border: 2px solid #444;
+  border-radius: 25px;
+  outline: none;
+  background-color: #1c1c1c;
+  color: #fff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+#searchInput::placeholder {
+  color: #888;
+}
+
+#searchInput:focus {
+  border-color: #ff5757;
+  box-shadow: 0 0 10px rgba(255, 87, 87, 0.5);
+}
+
+#searchBtn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 25px;
+  background: linear-gradient(90deg, #ff5757, #ff9b42);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 8px rgba(255, 87, 87, 0.4);
+}
+
+#searchBtn:hover {
+  background: linear-gradient(90deg, #ff9b42, #ff5757);
+  transform: scale(1.05);
+}
+
+    :root{
+      --bg:#0f1724;--card:#0b1220;--muted:#94a3b8;--accent:#ff6b6b;--glass:rgba(255,255,255,0.03);
+      --glass-2:rgba(255,255,255,0.02);--success:#34d399;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#071022 0%, #07162a 60%);color:#e6eef8}
+    header{display:flex;align-items:center;gap:18px;padding:18px 28px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo .mark{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ffa94d);display:flex;align-items:center;justify-content:center;font-weight:700;color:#081123}
+    .title{font-size:18px;font-weight:700}
+    .subtitle{font-size:12px;color:var(--muted)}
+
+    .container{display:grid;grid-template-columns:300px 1fr 380px;gap:20px;padding:22px}
+    /* Sidebar */
+    .sidebar{background:var(--card);padding:16px;border-radius:12px;min-height:60vh}
+    .search{display:flex;gap:8px;margin-bottom:12px}
+    .search input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .btn{background:var(--accent);border:none;padding:10px 12px;border-radius:8px;color:#081123;font-weight:700;cursor:pointer}
+    .small{font-size:13px;color:var(--muted);margin-top:8px}
+    .watchlist{margin-top:14px}
+    .watchlist-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;background:var(--glass);margin-bottom:8px}
+    .watchlist-item img{width:48px;height:68px;border-radius:6px;object-fit:cover}
+    .watchlist-item .meta{flex:1}
+    .reminder-form{display:flex;gap:8px;margin-top:10px}
+    .reminder-form input[type=date]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+
+    /* Main */
+    .main{min-height:60vh}
+    .controls{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .chips{display:flex;gap:8px}
+    .chip{padding:8px 10px;border-radius:999px;background:var(--glass);cursor:pointer;font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));padding:10px;border-radius:10px;cursor:pointer}
+    .card img{width:100%;height:230px;object-fit:cover;border-radius:6px}
+    .card .meta{padding:8px}
+    .stars{color:#ffd166}
+
+    /* Right column */
+    .right{background:var(--card);padding:16px;border-radius:12px;min-height:60vh}
+    .section{margin-bottom:18px}
+    .section h3{margin:0 0 8px 0}
+    .chart-wrap{background:var(--glass-2);padding:10px;border-radius:8px}
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(3,7,18,0.6);display:none;align-items:center;justify-content:center;padding:24px}
+    .modal.open{display:flex}
+    .modal-card{width:900px;max-width:98%;background:linear-gradient(180deg,#071627,#081526);padding:18px;border-radius:12px;display:grid;grid-template-columns:260px 1fr;gap:14px}
+    .movie-poster{width:100%;height:380px;object-fit:cover;border-radius:8px}
+    .movie-info{overflow:auto;padding-right:8px}
+    .rating-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .reviews{margin-top:10px}
+    .review{background:var(--glass);padding:10px;border-radius:8px;margin-bottom:8px}
+    .sentiment{font-weight:700;padding:4px 8px;border-radius:6px}
+    .sentiment.positive{background:rgba(52,211,153,0.12);color:var(--success)}
+    .sentiment.negative{background:rgba(255,107,107,0.08);color:var(--accent)}
+    .sentiment.neutral{background:rgba(148,163,184,0.06);color:var(--muted)}
+
+    footer{padding:18px;text-align:center;color:var(--muted)}
+
+    @media(max-width:1000px){
+      .container{grid-template-columns:1fr;}
+      .right{order:3}
+    }
+
+ .search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px auto;
+}
+
+#searchInput {
+  width: 350px;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 2px solid #444;
+  background-color: #1c1c1c;
+  color: white;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+#searchInput:focus {
+  border-color: #ff4c4c;
+  box-shadow: 0 0 8px rgba(255, 76, 76, 0.5);
+}
+
+#searchBtn {
+  padding: 10px 20px;
+  border-radius: 25px;
+  background: linear-gradient(90deg, #ff4c4c, #ff9442);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#searchBtn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #ff9442, #ff4c4c);
+}
+
+.movie-card {
+  background-color: #111;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 15px;
+  color: white;
+  text-align: center;
+  width: 200px;
+  display: inline-block;
+  vertical-align: top;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  transition: 0.3s;
+}
+.movie-card:hover {
+  transform: scale(1.05);
+}
+
+.movie-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.movie-detail {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  color: white;
+}
+
+.movie-detail img {
+  width: 300px;
+  border-radius: 15px;
+}
+
+.actions button {
+  margin: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ff4c4c;
+  color: white;
+  cursor: pointer;
+}
+
+.review-card {
+  background-color: #222;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 10px;
+}
+   
+  </style>
+</head>
+<body>
+  <div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search for a movie..." />
+  <button id="searchBtn">Search</button>
+</div>
+
+<div id="movie-list"></div>
+
+
+  <header>
+    <div id="user-info" style="position:absolute; top:10px; right:20px; color:white;"></div>
+
+<script>
+  const currentUser = localStorage.getItem("cinephileUser");
+  if(currentUser){
+    document.getElementById("user-info").innerText = "Welcome, " + currentUser;
+  }
+</script>
+
+    <div class="logo">
+      <div class="mark">Cine</div>
+      <div>
+        <div class="title">Cinephile</div>
+        <div class="subtitle">Discover • Rate • Review</div>
+      </div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;gap:10px;align-items:center">
+     
+      <button class="btn" id="btn-sample-data">Load Sample Data</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <div class="search">
+        <input id="search" placeholder="Search title, actor, director...">
+        <button class="btn" id="btn-search">Search</button>
+      </div>
+      <div class="small">Filters</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <select id="filter-genre">
+          <option value="">All genres</option>
+        </select>
+        <select id="filter-year">
+          <option value="">All years</option>
+        </select>
+        <select id="filter-rating">
+          <option value="">Any rating</option>
+          <option value="4">4★+</option>
+          <option value="3">3★+</option>
+          <option value="2">2★+</option>
+        </select>
+      </div>
+
+      <div class="watchlist">
+        <h4 style="margin-top:12px">Watchlist</h4>
+        <div id="watchlist-items"></div>
+        <div class="small">Add a reminder for a watchlist movie</div>
+        <div class="reminder-form">
+          <select id="reminder-movie"></select>
+          <input type="date" id="reminder-date">
+          <button class="btn" id="add-reminder">Add</button>
+        </div>
+        <div id="reminders" style="margin-top:10px"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="controls">
+        <div>
+          <div style="font-weight:700;font-size:18px">Discover</div>
+          <div class="small">Find movies, rate them, leave reviews and join discussions</div>
+        </div>
+        <div class="chips" id="genre-chips"></div>
+      </div>
+
+      <div class="grid" id="movie-grid"></div>
+    </main>
+
+    <aside class="right">
+      <div class="section">
+        <h3>Smart Recommendations</h3>
+        <div id="recommendations"></div>
+      </div>
+
+      <div class="section">
+        <h3>Insights & Trends</h3>
+        <div class="chart-wrap">
+          <canvas id="chart-genres" height="150"></canvas>
+        </div>
+        <div style="height:12px"></div>
+        <div class="chart-wrap">
+          <canvas id="chart-actors" height="150"></canvas>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Quick Actions</h3>
+        <button class="btn" id="btn-clear-data">Reset Local Data</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div>
+        <img id="modal-poster" class="movie-poster" src="">
+      </div>
+      <div class="movie-info">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <h2 id="modal-title" style="margin:0"></h2>
+            <div id="modal-meta" class="small" style="margin-top:6px"></div>
+          </div>
+          <div style="text-align:right">
+            <div id="modal-rating" style="font-size:22px;font-weight:700"></div>
+            <div class="small">average rating</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" id="modal-desc"></div>
+
+        <div class="rating-row">
+          <div>
+            <div class="small">Your rating</div>
+            <div id="my-rating">
+              <!-- stars injected -->
+            </div>
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn" id="btn-add-watchlist">Add to Watchlist</button>
+        </div>
+
+        <div class="reviews">
+          <h4 style="margin:8px 0">Community Reviews</h4>
+          <div id="reviews-list"></div>
+
+          <div style="margin-top:8px">
+            <textarea id="review-text" rows="3" style="width:100%;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit" placeholder="Share your thoughts..."></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+              <select id="review-rating">
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+              </select>
+              <button class="btn" id="submit-review">Submit Review</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:10px"></div>
+        <div style="text-align:right">
+          <button class="btn" id="close-modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const OMDB_API_KEY = "6b61e324";
+const STORAGE_KEY_V2 ="cinephile_v2";
+
+let stateV2 = {
+  reviews: [], // {imdbID, rating, text, date}
+  watchlist: [] // imdbID array
+};
+
+// ---------- Save & Load ----------
+function save() {
+  localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(stateV2));
+}
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY_V2);
+  if (raw) stateV2 = JSON.parse(raw);
+}
+load();
+
+// ---------- Fetch movies from OMDb ----------
+async function fetchMovies(query) {
+  if (!query) return;
+
+  const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&apikey=6b61e324`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  if (data.Response === "True") {
+    displayMovies(data.Search);
+  } else {
+    document.getElementById("movie-list").innerHTML =
+      `<p style="color:white;text-align:center;">No results found.</p>`;
+  }
+}
+
+// ---------- Display search results ----------
+function displayMovies(movies) {
+  const container = document.getElementById("movie-list");
+  container.innerHTML = "";
+
+  movies.forEach((m) => {
+    const card = document.createElement("div");
+    card.className = "movie-card";
+    card.innerHTML = `
+      <img src="${m.Poster !== "N/A" ? m.Poster : "https://via.placeholder.com/300x450"}" alt="${m.Title}">
+      <h3>${m.Title}</h3>
+      <p>${m.Year}</p>
+      <button onclick="openOMDBDetails('${m.imdbID}')">Open</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ---------- Show movie details ----------
+async function openOMDBDetails(imdbID) {
+  const url = `https://www.omdbapi.com/?i=${imdbID}&apikey=6b61e324`;
+  const res = await fetch(url);
+  const movie = await res.json();
+
+  const container = document.getElementById("movie-list");
+  container.innerHTML = `
+    <div class="movie-detail">
+      <img src="${movie.Poster !== "N/A" ? movie.Poster : "https://via.placeholder.com/400x600"}" alt="${movie.Title}">
+      <div class="movie-info">
+        <h2>${movie.Title} (${movie.Year})</h2>
+        <p><strong>Genre:</strong> ${movie.Genre}</p>
+        <p><strong>Director:</strong> ${movie.Director}</p>
+        <p><strong>Actors:</strong> ${movie.Actors}</p>
+        <p><strong>Plot:</strong> ${movie.Plot}</p>
+
+        <div class="actions">
+          <button onclick="rateMovie('${imdbID}')">⭐ Rate</button>
+          <button onclick="reviewMovie('${imdbID}')">💬 Review</button>
+          <button onclick="addToWatchlist('${imdbID}')">🎬 Add to Watchlist</button>
+          <button onclick="goBack()">⬅ Back</button>
+        </div>
+
+        <div id="user-section"></div>
+      </div>
+    </div>
+  `;
+
+  renderUserSection(imdbID);
+}
+
+// ---------- Rate, Review, Watchlist ----------
+function rateMovie(imdbID) {
+  const rating = prompt("Rate this movie (1–5):");
+  if (!rating || isNaN(rating) || rating < 1 || rating > 5) return;
+
+  state.reviews.push({ imdbID, rating, text: "", date: new Date().toLocaleDateString() });
+  save();
+  alert("Rating saved!");
+  renderUserSection(imdbID);
+}
+
+function reviewMovie(imdbID) {
+  const text = prompt("Write your review:");
+  if (!text) return;
+
+  state.reviews.push({ imdbID, rating: "", text, date: new Date().toLocaleDateString() });
+  save();
+  alert("Review added!");
+  renderUserSection(imdbID);
+}
+
+function addToWatchlist(imdbID) {
+  if (!state.watchlist.includes(imdbID)) {
+    state.watchlist.push(imdbID);
+    save();
+    alert("Added to watchlist!");
+  } else {
+    alert("Already in your watchlist.");
+  }
+}
+
+function renderUserSection(imdbID) {
+  const section = document.getElementById("user-section");
+  const userReviews = state.reviews.filter((r) => r.imdbID === imdbID);
+
+  if (userReviews.length === 0) {
+    section.innerHTML = "<p>No ratings or reviews yet.</p>";
+    return;
+  }
+
+  let html = "<h3>User Feedback</h3>";
+  userReviews.forEach((r) => {
+    html += `
+      <div class="review-card">
+        <p><strong>⭐ ${r.rating || "No rating"}</strong></p>
+        <p>${r.text || "No review text"}</p>
+        <small>${r.date}</small>
+      </div>
+    `;
+  });
+  section.innerHTML = html;
+}
+
+function goBack() {
+  document.getElementById("movie-list").innerHTML = "";
+}
+
+// ---------- Search button ----------
+document.getElementById("searchBtn").addEventListener("click", () => {
+  const query = document.getElementById("searchInput").value;
+  fetchMovies(query);
+});
+</script>
+
+ 
+
+
+<script>
+  
+
+    // Redirect to login if not logged in
+if (!localStorage.getItem('cinephileUser')) {
+  window.location.href = "login.html";
+}
+
+// --------------------- Data & Persistence ---------------------
+const STORAGE_KEY = 'cinephile_v1';
+let state = {
+  movies: [],
+  reviews: [], // {movieId, user, rating, text, date, sentiment}
+  userRatings: {}, // movieId -> rating
+  watchlist: [], // movieId array
+  reminders: [] // {movieId, date}
+};
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function load() { const raw = localStorage.getItem(STORAGE_KEY); if(raw) state = JSON.parse(raw); }
+
+// --------------------- Sample dataset ---------------------
+const sampleMovies = [
+  {id:'m1',title:'Midnight Echoes',year:2021,genres:['Drama','Mystery'],actors:['R. Kapoor','A. Rao'],director:'K. Sen',poster:'https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ce/a2/1d/cea21d03-6bed-ebc7-64b4-a09d30264116/artwork.jpg/1200x630bb.jpg',desc:'A quiet town hides louder secrets. A woman returns to face truth and lies.'},
+  {id:'m2',title:'Interstellar',year:2024,genres:['Sci-Fi','Adventure'],actors:['Matthew McConaughey','Anne Hathaway'],director:'Christopher Nolan',poster:'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg',desc:'An astronaut stranded near a rogue planet must learn to trust an unlikely ally.'},
+  {id:'m3',title:'Last Train Home',year:2019,genres:['Thriller'],actors:['Chris','Loala Rain'],director:'Henry maddison',poster:'https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?auto=format&fit=crop&w=800&q=60',desc:'One night, one route, one decision — a chain reaction that exposes everyone.'},
+  {id:'m4',title:'Mr.Bean',year:2022,genres:['Comedy','Drama'],actors:['Rowan Atkinson'],director:'Steve Bendelack',poster:'https://upload.wikimedia.org/wikipedia/en/thumb/3/37/Bean_movie_poster.jpg/250px-Bean_movie_poster.jpg',desc:'The life of Mr.Bean throughout years.'},
+  {id:'m5',title:'How To Lose A Guy In 10 Days',year:2020,genres:['Romance'],actors:['Kate Hudson','Matthew McConaughey'],director:'Donald Petrie',poster:'https://m.media-amazon.com/images/M/MV5BMjE4NTA1NzExN15BMl5BanBnXkFtZTYwNjc3MjM3._V1_.jpg',desc:'A love story that loops over time, asking whether fate can be rewritten.'},
+  {id:'m6',title:'Alice In Borderland',year:2018,genres:['Action'],actors:['Kento Yamazaki','Tao Tsuchiya'],director:'Shinsuke Sato',poster:'https://images.justwatch.com/poster/253109058/s718/alice-in-borderland.jpg',desc:'Brutal survival thriller that challenges the players to live longer.'},
+  {id:'m7',title:'The Summer I Turned Pretty ',year:2023,genres:['Drama','Family'],actors:['Christopher Briney','Lola Tung'],director:'Jenny Han',poster:'https://preview.redd.it/new-poster-and-schedule-released-v0-29esvu09v38f1.jpg?width=640&crop=smart&auto=webp&s=555599e3a369605525935c700733702eae7350cb',desc:'Every Summer reunites Conklin and Fisher family across years and small everyday acts.'},
+  {id:'m8',title:'Psycho',year:2024,genres:['Crime','Mystery'],actors:['Udaynithi','Aditi Rao'],director:'Myskin',poster:'https://m.media-amazon.com/images/M/MV5BNjYxZjMyMGMtZjQ4Yi00NzJjLWE4M2EtYmVjNzFhOGI0MmQyXkEyXkFqcGc@._V1_.jpg',desc:'A detective navigates unknown streets to uncover a serial killer conspiracy.'}
+];
+
+// --------------------- Utilities ---------------------
+function ensureSampleLoaded(){ if(state.movies.length===0) { state.movies = sampleMovies; save(); renderAll(); }}
+
+function uid(len=8){ return Math.random().toString(36).slice(2,2+len); }
+
+function getMovieById(id){ return state.movies.find(m=>m.id===id); }
+
+function avgRating(movieId){
+  const rs = state.reviews.filter(r=>r.movieId===movieId).map(r=>r.rating);
+  if(state.userRatings[movieId]) rs.push(state.userRatings[movieId]);
+  if(rs.length===0) return 0;
+  return (rs.reduce((a,b)=>a+b,0)/rs.length).toFixed(1);
+}
+
+// --------------------- Sentiment (naive client-side) ---------------------
+const POSITIVE = ['amazing','excellent','love','loved','great','wonderful','best','fantastic','brilliant','enjoyed','liked','beautiful','touching','masterpiece','nice'];
+const NEGATIVE = ['bad','boring','waste','worst','awful','terrible','disappoint','weak','slow','flop','forgettable','stupid'];
+function analyzeSentiment(text){
+  const t = text.toLowerCase(); let s=0;
+  POSITIVE.forEach(w=>{ if(t.includes(w)) s+=1; });
+  NEGATIVE.forEach(w=>{ if(t.includes(w)) s-=1; });
+  if(s>0) return 'positive'; if(s<0) return 'negative'; return 'neutral';
+}
+
+// --------------------- Rendering ---------------------
+const movieGrid = document.getElementById('movie-grid');
+const genreChips = document.getElementById('genre-chips');
+const filterGenre = document.getElementById('filter-genre');
+const filterYear = document.getElementById('filter-year');
+const filterRating = document.getElementById('filter-rating');
+const searchInput = document.getElementById('search');
+
+function renderAll(){ renderFilters(); renderGrid(); renderWatchlist(); renderRecommendations(); renderCharts(); }
+
+function collectGenres(){ const set=new Set(); state.movies.forEach(m=>m.genres.forEach(g=>set.add(g))); return Array.from(set).sort(); }
+
+function renderFilters(){
+  const genres = collectGenres();
+  filterGenre.innerHTML='<option value="">All genres</option>';
+  genres.forEach(g=>{ const o=document.createElement('option'); o.value=g; o.textContent=g; filterGenre.appendChild(o); });
+  // years
+  const years = Array.from(new Set(state.movies.map(m=>m.year))).sort((a,b)=>b-a);
+  filterYear.innerHTML='<option value="">All years</option>';
+  years.forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; filterYear.appendChild(o); });
+  // genre chips
+  genreChips.innerHTML='';
+  genres.forEach(g=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=g; c.onclick=()=>{ filterGenre.value=g; renderGrid(); }; genreChips.appendChild(c); });
+}
+
+function matchesFilter(m){
+  const q = searchInput.value.trim().toLowerCase();
+  if(q){ if(!(m.title.toLowerCase().includes(q) || m.actors.join(' ').toLowerCase().includes(q) || m.director.toLowerCase().includes(q))) return false; }
+  if(filterGenre.value && !m.genres.includes(filterGenre.value)) return false;
+  if(filterYear.value && String(m.year)!==String(filterYear.value)) return false;
+  if(filterRating.value){ if(Number(avgRating(m.id))<Number(filterRating.value)) return false; }
+  return true;
+}
+
+function renderGrid(){ movieGrid.innerHTML='';
+  state.movies.filter(matchesFilter).forEach(m=>{
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `
+      <img src="${m.poster}" alt="${m.title}">
+      <div class="meta">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>${m.title}</strong>
+          <div class="small">${m.year}</div>
+        </div>
+        <div class="small">${m.genres.join(', ')}</div>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+          <div><span class="stars">★</span> ${avgRating(m.id)}</div>
+          <div><button class="btn" onclick="openModal('${m.id}')">Open</button></div>
+        </div>
+      </div>
+    `;
+    movieGrid.appendChild(card);
+  });
+}
+
+
+
+
+// --------------------- Modal & Reviews ---------------------
+const modal = document.getElementById('modal');
+const modalPoster = document.getElementById('modal-poster');
+const modalTitle = document.getElementById('modal-title');
+const modalMeta = document.getElementById('modal-meta');
+const modalDesc = document.getElementById('modal-desc');
+const modalRating = document.getElementById('modal-rating');
+const reviewsList = document.getElementById('reviews-list');
+let activeMovieId = null;
+
+function openModal(id){ activeMovieId = id; const m = getMovieById(id);
+  modalPoster.src = m.poster; modalTitle.textContent = m.title; modalMeta.textContent = m.genres.join(' • ') + ' — ' + m.director + ' — ' + m.actors.join(', ');
+  modalDesc.textContent = m.desc; modalRating.textContent = avgRating(id);
+  renderMyRating(); renderReviews(); modal.classList.add('open');
+}
+
+document.getElementById('close-modal').onclick = ()=>{ modal.classList.remove('open'); activeMovieId=null; };
+
+function renderMyRating(){ const el = document.getElementById('my-rating'); el.innerHTML='';
+  for(let i=1;i<=5;i++){ const star = document.createElement('span'); star.style.cursor='pointer'; star.textContent='☆'; star.style.fontSize='20px'; star.onclick = ()=>{ state.userRatings[activeMovieId]=i; save(); modalRating.textContent = avgRating(activeMovieId); renderRatingsUI(); renderMyRating(); renderRecommendations(); renderCharts(); };
+    if(state.userRatings[activeMovieId] && i<=state.userRatings[activeMovieId]) star.textContent='★'; el.appendChild(star);
+  }
+}
+
+function renderRatingsUI(){ /* placeholder if global UI is needed */ }
+
+function renderReviews(){ reviewsList.innerHTML='';
+  const rs = state.reviews.filter(r=>r.movieId===activeMovieId).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  rs.forEach(r=>{
+    const d=document.createElement('div'); d.className='review';
+    d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>${r.user}</strong><div class="small">${r.date}</div></div>
+      <div style="margin-top:6px">${r.text}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><div class="sentiment ${r.sentiment}">${r.sentiment.toUpperCase()}</div><div class="small">Rating: ${r.rating}★</div></div>
+    `;
+    reviewsList.appendChild(d);
+  });
+}
+
+document.getElementById('submit-review').onclick = ()=>{
+  const text = document.getElementById('review-text').value.trim();
+  const rating = Number(document.getElementById('review-rating').value);
+  if(!activeMovieId) return alert('Open a movie first');
+  if(!text) return alert('Write a review');
+  const sentiment = analyzeSentiment(text);
+  state.reviews.push({movieId:activeMovieId,user:'Sadhh',rating,text,date:new Date().toLocaleString(),sentiment});
+  save(); document.getElementById('review-text').value=''; renderReviews(); renderCharts(); renderRecommendations();
+}
+
+// --------------------- Watchlist & Reminders ---------------------
+function renderWatchlist(){ const wrap = document.getElementById('watchlist-items'); wrap.innerHTML='';
+  state.watchlist.forEach(id=>{
+    const m = getMovieById(id); if(!m) return;
+    const div = document.createElement('div'); div.className='watchlist-item';
+    div.innerHTML = `<img src="${m.poster}"><div class="meta"><strong>${m.title}</strong><div class="small">${m.year} • ${m.genres.join(', ')}</div></div><div><button class="btn" onclick="removeFromWatchlist('${id}')">Remove</button></div>`;
+    wrap.appendChild(div);
+  });
+  // reminder movie select
+  const sel = document.getElementById('reminder-movie'); sel.innerHTML='';
+  const opt = document.createElement('option'); opt.value=''; opt.textContent='Choose movie'; sel.appendChild(opt);
+  state.watchlist.forEach(id=>{ const m=getMovieById(id); if(!m) return; const o=document.createElement('option'); o.value=id; o.textContent=m.title; sel.appendChild(o); });
+  renderReminders();
+}
+
+function addToWatchlist(id){ if(!state.watchlist.includes(id)) state.watchlist.push(id); save(); renderWatchlist(); }
+function removeFromWatchlist(id){ state.watchlist = state.watchlist.filter(x=>x!==id); state.reminders = state.reminders.filter(r=>r.movieId!==id); save(); renderWatchlist(); renderAll(); }
+
+document.getElementById('btn-add-watchlist').onclick = ()=>{ if(!activeMovieId) return; addToWatchlist(activeMovieId); alert('Added to watchlist'); };
+
+document.getElementById('add-reminder').onclick = ()=>{
+  const mid = document.getElementById('reminder-movie').value; const date = document.getElementById('reminder-date').value; if(!mid || !date) return alert('Choose movie and date');
+  state.reminders.push({movieId:mid,date}); save(); renderReminders(); alert('Reminder added — you will see it in the reminders box (client-only)');
+}
+
+function renderReminders(){ const box = document.getElementById('reminders'); box.innerHTML='';
+  state.reminders.forEach(r=>{
+    const m=getMovieById(r.movieId); if(!m) return;
+    const d = document.createElement('div'); d.className='small'; d.style.marginBottom='6px'; d.textContent = `${m.title} — ${r.date} `;
+    box.appendChild(d);
+  });
+}
+
+// --------------------- Recommendations ---------------------
+function renderRecommendations(){ const wrap = document.getElementById('recommendations'); wrap.innerHTML='';
+  // Simple content-aware recommender: determine user's top genres from ratings
+  const counts = {};
+  for(const [mid,r] of Object.entries(state.userRatings)){
+    const m = getMovieById(mid); if(!m) continue;
+    m.genres.forEach(g=>{ counts[g]=(counts[g]||0)+Number(r); });
+  }
+  // include review-based affinities
+  state.reviews.forEach(r=>{ if(r.user==='Sadhh'){ const m=getMovieById(r.movieId); if(!m) return; m.genres.forEach(g=>{ counts[g]=(counts[g]||0)+r.rating; }); }});
+  const preferred = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  let candidates = state.movies.filter(m=> !state.watchlist.includes(m.id));
+  // score candidates by genre match + avg rating
+  candidates = candidates.map(m=>{
+    let score = m.genres.reduce((s,g)=> s + (counts[g]||0), 0);
+    score += Number(avgRating(m.id))*2;
+    return {...m, score};
+  }).sort((a,b)=>b.score-a.score).slice(0,5);
+  candidates.forEach(c=>{
+    const el = document.createElement('div'); el.style.display='flex'; el.style.gap='8px'; el.style.alignItems='center'; el.style.marginBottom='8px';
+    el.innerHTML = `<img src="${c.poster}" style="width:60px;height:80px;border-radius:6px;object-fit:cover"><div style="flex:1"><strong>${c.title}</strong><div class="small">${c.genres.join(', ')} • ${c.year}</div></div><div style="text-align:right"><div style="font-weight:700">${avgRating(c.id)}★</div><div class="small">score ${c.score.toFixed(1)}</div></div>`;
+    wrap.appendChild(el);
+  });
+  if(candidates.length===0) wrap.innerHTML='<div class="small">Rate a few movies or add to watchlist to get recommendations.</div>';
+}
+
+// --------------------- Charts ---------------------
+let chartGenres=null, chartActors=null;
+function renderCharts(){ const genreCounts = {};
+  state.movies.forEach(m=> m.genres.forEach(g=> genreCounts[g]=(genreCounts[g]||0)+1));
+  const gLabels = Object.keys(genreCounts);
+  const gData = gLabels.map(l=>genreCounts[l]);
+  if(chartGenres) chartGenres.destroy();
+  const ctxG = document.getElementById('chart-genres').getContext('2d');
+  chartGenres = new Chart(ctxG, { type:'doughnut', data:{labels:gLabels,datasets:[{data:gData}]}, options:{plugins:{legend:{position:'bottom'}}} });
+
+  // Top actors
+  const actorCounts={}; state.movies.forEach(m=> m.actors.forEach(a=>actorCounts[a]=(actorCounts[a]||0)+1));
+  const aLabels = Object.keys(actorCounts).slice(0,6);
+  const aData = aLabels.map(l=>actorCounts[l]);
+  if(chartActors) chartActors.destroy();
+  const ctxA = document.getElementById('chart-actors').getContext('2d');
+  chartActors = new Chart(ctxA, { type:'bar', data:{labels:aLabels,datasets:[{data:aData}]}, options:{plugins:{legend:{display:false}}} });
+}
+
+// --------------------- Controls & Events ---------------------
+document.getElementById('btn-search').onclick = ()=>renderGrid();
+searchInput.addEventListener('keyup', (e)=>{ if(e.key==='Enter') renderGrid(); });
+filterGenre.onchange = renderGrid; filterYear.onchange = renderGrid; filterRating.onchange = renderGrid;
+
+// sample data loader
+document.getElementById('btn-sample-data').onclick = ()=>{ state.movies = sampleMovies; state.reviews = []; state.userRatings = {}; state.watchlist = []; state.reminders = []; save(); renderAll(); };
+
+// reset
+document.getElementById('btn-clear-data').onclick = ()=>{ if(confirm('Reset local data?')){ localStorage.removeItem(STORAGE_KEY); state = {movies:[],reviews:[],userRatings:{},watchlist:[],reminders:[]}; renderAll(); }};
+
+// open modal from global scope used in onclick creators
+window.openModal = openModal; window.addToWatchlist = addToWatchlist; window.removeFromWatchlist = removeFromWatchlist;
+
+// --------------------- Initialization ---------------------
+load(); if(!state.movies || state.movies.length===0) { state.movies = sampleMovies; }
+renderAll();
+
+// Auto-load custom movies on page load
+window.onload = function() {
+  loadSampleMovies();  
+};
+
+
+
+</script>
+</body>
+</html>
